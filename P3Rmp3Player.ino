@@ -336,9 +336,9 @@ void setup() {
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
-    display.println("ESP32 MP3 Player");
+    display.println("P3R Music Player");
     display.setCursor(0, 16);
-    display.println("Starting...");
+    display.println("Dark Hour ready");
     display.display();
   }
 

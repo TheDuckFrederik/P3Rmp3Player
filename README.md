@@ -1,6 +1,6 @@
 # ESP32 MP3 Player (SD + I2S DAC)
 
-This project is a simple MP3 player for ESP32.
+This project is a Persona 3 Reload-inspired MP3 player replica built on ESP32.
 
 ## Hardware (default wiring)
 
@@ -82,5 +82,6 @@ Example:
 
 ## Notes
 
-- If your hardware uses different pins, edit pin definitions in `src/main.cpp`.
+- If your hardware uses different pins, edit pin definitions in `P3Rmp3Player.ino`.
 - Some cheap SD modules are 5V; use proper level shifting or 3.3V-safe module.
+- Use your own legally obtained audio files in `/music`.
