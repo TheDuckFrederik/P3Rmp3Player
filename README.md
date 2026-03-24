@@ -154,6 +154,14 @@ The PCM5102A is a high-quality 32-bit stereo I2S DAC with a line-level output. I
 
 Standard PCM5102A breakout modules (common on Amazon / AliExpress) already have all control pins handled on-board and include a built-in 3.5 mm headphone jack. **If you are plugging headphones into the board's jack, you only need 5 wires from the ESP32:**
 
+| ESP32 pin | PCM5102A pin | Required | Purpose |
+|---|---|:---:|---|
+| GPIO 26 | BCK | Yes | I2S bit clock |
+| GPIO 25 | LRCK | Yes | I2S word clock (L/R select) |
+| GPIO 15 | DIN | Yes | I2S audio data |
+| 3.3 V | A3V3 | Yes | DAC power |
+| GND | AGND | Yes | Ground reference |
+
 ```
 ESP32 DevKit          PCM5102A Breakout
 ─────────────         ─────────────────
@@ -173,6 +181,19 @@ Then plug your headphones into the 3.5 mm jack on the breakout board. Done.
 #### Using a bare PCM5102A chip (advanced)
 
 If you are working directly with the IC (no breakout board), all control pins must be wired manually:
+
+| ESP32 pin | PCM5102A pin | Required | Purpose |
+|---|---|:---:|---|
+| GPIO 26 | BCK | Yes | I2S bit clock |
+| GPIO 25 | LRCK | Yes | I2S word clock (L/R select) |
+| GPIO 15 | DIN | Yes | I2S audio data |
+| 3.3 V | A3V3 | Yes | DAC power |
+| GND | AGND | Yes | Ground reference |
+| GND | SCK | Yes | Internal PLL mode (no external MCLK) |
+| 3.3 V | XSMT | Yes | Unmute DAC output |
+| GND | FMT | Yes | Select I2S format |
+| GND | FLT | Yes | Select normal latency filter |
+| GND | DEMP | Yes | Disable de-emphasis |
 
 ```
 ESP32 DevKit          PCM5102A (bare chip)
