@@ -131,18 +131,6 @@ GND             ───►  GND
 
 The PCM5102A is a high-quality 32-bit stereo I2S DAC with a line-level output. It does **not** include a power amplifier, but its output level is sufficient to drive **wired headphones directly** through a 3.5 mm jack.
 
-#### Using a PCM5102A breakout board (recommended)
-
-Standard PCM5102A breakout modules (common on Amazon / AliExpress) already have all control pins handled on-board and include a built-in 3.5 mm headphone jack. **If you are plugging headphones into the board's jack, you only need 5 wires from the ESP32:**
-
-| ESP32 pin | PCM5102A pin | Required | Purpose |
-|---|---|:---:|---|
-| GPIO 26 | BCK | Yes | I2S bit clock |
-| GPIO 25 | LRCK | Yes | I2S word clock (L/R select) |
-| GPIO 15 | DIN | Yes | I2S audio data |
-| 3.3 V | A3V3 | Yes | DAC power |
-| GND | AGND | Yes | Ground reference |
-
 ```
 ESP32 DevKit          PCM5102A Breakout
 ─────────────         ─────────────────
@@ -153,48 +141,9 @@ GPIO 15  (DIN)  ───►  DIN      (I2S data)
 GND             ───►  AGND
 ```
 
-Then plug your headphones into the 3.5 mm jack on the breakout board. Done.
+Then plug your wired headphones into the board's 3.5 mm jack.
 
-> **Note:** The breakout board's PCB already ties `SCK → AGND` (internal PLL), `XSMT → A3V3` (unmuted), and `FMT / FLT / DEMP → AGND` (standard I2S settings). No extra wiring is needed for those pins.
-
----
-
-#### Using a bare PCM5102A chip (advanced)
-
-If you are working directly with the IC (no breakout board), all control pins must be wired manually:
-
-| ESP32 pin | PCM5102A pin | Required | Purpose |
-|---|---|:---:|---|
-| GPIO 26 | BCK | Yes | I2S bit clock |
-| GPIO 25 | LRCK | Yes | I2S word clock (L/R select) |
-| GPIO 15 | DIN | Yes | I2S audio data |
-| 3.3 V | A3V3 | Yes | DAC power |
-| GND | AGND | Yes | Ground reference |
-| GND | SCK | Yes | Internal PLL mode (no external MCLK) |
-| 3.3 V | XSMT | Yes | Unmute DAC output |
-| GND | FMT | Yes | Select I2S format |
-| GND | FLT | Yes | Select normal latency filter |
-| GND | DEMP | Yes | Disable de-emphasis |
-
-```
-ESP32 DevKit          PCM5102A (bare chip)
-─────────────         ────────────────────
-GPIO 26  (BCLK) ───►  BCK
-GPIO 25  (LRC)  ───►  LRCK
-GPIO 15  (DIN)  ───►  DIN
-3.3 V           ───►  A3V3     ← 3.3 V ONLY
-GND             ───►  AGND
-GND (AGND)      ───►  SCK      ← tie LOW → internal PLL mode
-3.3 V (A3V3)    ───►  XSMT     ← tie HIGH → unmuted
-GND (AGND)      ───►  FMT      ← tie LOW → I2S format
-GND (AGND)      ───►  FLT      ← tie LOW → normal-latency filter
-GND (AGND)      ───►  DEMP     ← tie LOW → de-emphasis off
-                      LROUT ───► 3.5 mm jack tip   (Left +)
-                      ROUT  ───► 3.5 mm jack ring  (Right +)
-                      AGND  ───► 3.5 mm jack sleeve (Ground)
-```
-
-> **Important — XSMT must be HIGH:** If left floating or tied low, the output is silenced. This is the most common wiring mistake with the bare chip.
+> **Note:** Most breakout boards already tie `SCK` low (PLL mode), `XSMT` high (unmuted), and `FMT/FLT/DEMP` low. If your board exposes those pins and audio is muted, verify `XSMT` is high.
 
 ---
 
