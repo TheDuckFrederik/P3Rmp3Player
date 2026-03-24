@@ -51,7 +51,7 @@ constexpr int SD_MOSI = 23;   ///< SPI MOSI (Master Out, Slave In)
 
 constexpr int I2S_BCLK = 26;  ///< I2S bit clock output to DAC
 constexpr int I2S_LRC  = 25;  ///< I2S word-select / left-right clock output to DAC
-constexpr int I2S_DOUT = 22;  ///< I2S serial data output to DAC
+constexpr int I2S_DOUT = 15;  ///< I2S serial data output to DAC
 
 constexpr int BTN_PLAY_PAUSE = 32; ///< Play / Pause toggle button (active-low)
 constexpr int BTN_NEXT       = 33; ///< Skip to next track (active-low)
@@ -60,7 +60,7 @@ constexpr int BTN_VOL_UP     = 14; ///< Increase volume (active-low)
 constexpr int BTN_VOL_DOWN   = 13; ///< Decrease volume (active-low)
 
 constexpr int OLED_SDA = 21;  ///< I2C data line for the SSD1306 OLED
-constexpr int OLED_SCL = 4;   ///< I2C clock line for the SSD1306 OLED
+constexpr int OLED_SCL = 22;  ///< I2C clock line for the SSD1306 OLED (standard ESP32 I2C SCL)
 } // namespace Pins
 
 /**

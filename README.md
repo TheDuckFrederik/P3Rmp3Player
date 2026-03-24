@@ -78,8 +78,8 @@ The project is a love letter to the **Persona 3 Reload** OST and the aesthetic o
 │                               ▼                             │
 │                       ┌──────────────┐   I2S PCM   ┌─────┐ │
 │                       │ ESP32-audioI2S│────────────►│ DAC │ │
-│                       │  (MP3 decode) │  BCLK/LRC/  │     │ │
-│                       └──────────────┘  DIN         └──┬──┘ │
+│                       │  (MP3 decode) │ BCLK/LRC/   │     │ │
+│                       └──────────────┘ DIN(15)      └──┬──┘ │
 │                                                        │    │
 │  ┌──────────────┐  I2C  ┌───────────────┐          Speaker  │
 │  │  SSD1306     │◄─────►│ Display Logic │                   │
@@ -134,7 +134,7 @@ ESP32 DevKit          I2S DAC
 ─────────────         ───────
 GPIO 26  (BCLK) ───►  BCLK
 GPIO 25  (LRC)  ───►  LRC / WS
-GPIO 22  (DIN)  ───►  DIN
+GPIO 15  (DIN)  ───►  DIN
 3.3 V or 5 V    ───►  VIN       (check module datasheet)
 GND             ───►  GND
                       Speaker+  ───► Speaker (+)
@@ -149,7 +149,7 @@ GND             ───►  GND
 ESP32 DevKit          SSD1306 OLED
 ─────────────         ────────────
 GPIO 21  (SDA)  ───►  SDA
-GPIO  4  (SCL)  ───►  SCL
+GPIO 22  (SCL)  ───►  SCL
 3.3 V           ───►  VCC
 GND             ───►  GND
 ```
@@ -182,9 +182,9 @@ GPIO 13         ───┤  Vol  −  ├─── GND
 | SD MOSI | 23 | OUT | SPI |
 | I2S BCLK | 26 | OUT | I2S |
 | I2S LRC/WS | 25 | OUT | I2S |
-| I2S DIN | 22 | OUT | I2S |
+| I2S DIN | 15 | OUT | I2S |
 | OLED SDA | 21 | BIDIR | I2C |
-| OLED SCL | 4 | OUT | I2C |
+| OLED SCL | 22 | OUT | I2C |
 | BTN Play/Pause | 32 | IN | GPIO |
 | BTN Next | 33 | IN | GPIO |
 | BTN Previous | 27 | IN | GPIO |
@@ -271,14 +271,14 @@ All tunable constants are declared in named C++ `namespace` blocks at the top of
 | `SD_MOSI` | `23` | SPI MOSI |
 | `I2S_BCLK` | `26` | I2S bit clock |
 | `I2S_LRC` | `25` | I2S word-select / left-right clock |
-| `I2S_DOUT` | `22` | I2S data output to DAC |
+| `I2S_DOUT` | `15` | I2S data output to DAC |
 | `BTN_PLAY_PAUSE` | `32` | Play / Pause button |
 | `BTN_NEXT` | `33` | Next track button |
 | `BTN_PREV` | `27` | Previous track button |
 | `BTN_VOL_UP` | `14` | Volume increase button |
 | `BTN_VOL_DOWN` | `13` | Volume decrease button |
 | `OLED_SDA` | `21` | I2C data line for OLED |
-| `OLED_SCL` | `4` | I2C clock line for OLED |
+| `OLED_SCL` | `22` | I2C clock line for OLED |
 
 ### `PlayerConfig` namespace
 
