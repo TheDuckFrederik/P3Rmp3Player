@@ -131,25 +131,6 @@ GND             ───►  GND
 
 The PCM5102A is a high-quality 32-bit stereo I2S DAC with a line-level output. It does **not** include a power amplifier, but its output level is sufficient to drive **wired headphones directly** through a 3.5 mm jack.
 
-#### PCM5102A Pin Reference
-
-| Pin | Type | Description |
-|---|:---:|---|
-| `BCK` | IN | Audio bit-clock input |
-| `LRCK` | IN | Audio word-clock input (left/right select) |
-| `DIN` | IN | Audio serial data input |
-| `SCK` | IN | System clock input — tie `LOW` to enable internal PLL (no external clock needed) |
-| `XSMT` | IN | Soft-mute control — `LOW` = muted, `HIGH` = active |
-| `FMT` | IN | Audio format select — `LOW` = I2S, `HIGH` = left-justified |
-| `FLT` | IN | Filter select — `LOW` = normal latency, `HIGH` = low latency |
-| `DEMP` | IN | De-emphasis — `LOW` = off, `HIGH` = on (44.1 kHz only) |
-| `A3V3` | PWR | Analog 3.3 V supply |
-| `AGND` | PWR | Analog ground |
-| `LROUT` | OUT | Left channel analog output |
-| `ROUT` | OUT | Right channel analog output |
-
----
-
 #### Using a PCM5102A breakout board (recommended)
 
 Standard PCM5102A breakout modules (common on Amazon / AliExpress) already have all control pins handled on-board and include a built-in 3.5 mm headphone jack. **If you are plugging headphones into the board's jack, you only need 5 wires from the ESP32:**
