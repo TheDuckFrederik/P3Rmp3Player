@@ -52,7 +52,7 @@ The project is a love letter to the **Persona 3 Reload** OST and the aesthetic o
 | Feature | Detail |
 |---|---|
 | MP3 Playback | Hardware-accelerated decoding via `ESP32-audioI2S` |
-| I2S Audio Output | Direct digital audio to DAC (e.g., MAX98357A) |
+| I2S Audio Output | Direct digital audio to PCM5102A stereo DAC |
 | SD Card Source | FAT32 MicroSD; auto-discovers all `.mp3` files in `/music` |
 | Track Navigation | Next / Previous with automatic wrap-around |
 | Play / Pause | Toggle with state preservation |
@@ -99,10 +99,11 @@ The project is a love letter to the **Persona 3 Reload** OST and the aesthetic o
 |---|---|---|
 | Microcontroller | ESP32 DevKit (any variant) | 38-pin or 30-pin boards both work |
 | MicroSD Module | SPI interface, FAT32 | Use a **3.3 V–safe** module; cheap 5 V modules may damage the ESP32 |
-| DAC Module | I2S (e.g., MAX98357A, PCM5102) | MAX98357A includes a built-in Class D amplifier |
+| DAC Module | PCM5102A (I2S, 32-bit stereo) | Line-level output; requires an external amplifier or headphone jack board — **3.3 V only** |
+| Amplifier / Output | External audio amp or headphone jack breakout | e.g., PAM8403 for speakers; most PCM5102A breakout boards include a 3.5 mm jack |
+| Speaker | 4–8 Ω, ≥ 1 W (with external amp) | Not directly driven by the PCM5102A; wire through your amplifier board |
 | OLED Display | 128×32, I2C, SSD1306 controller | I2C address `0x3C` (most common) |
 | Push Buttons | Tactile momentary switches × 5 | Wired to GPIO and GND; uses internal pull-ups |
-| Speaker | 4–8 Ω, ≥ 1 W | Match impedance to your DAC module's spec |
 | MicroSD Card | ≤ 32 GB, FAT32 formatted | SDHC cards up to 32 GB are the most reliable |
 | Power Supply | 5 V via USB or external | Ensure ≥ 500 mA for stable SD + DAC operation |
 
@@ -127,19 +128,31 @@ GND             ───►  GND
 
 ---
 
-### I2S DAC Module (e.g., MAX98357A)
+### I2S DAC — PCM5102A
+
+The PCM5102A is a high-quality 32-bit stereo I2S DAC. It outputs **line-level analog audio** on its OUTL/OUTR pins; it does **not** include a power amplifier. Feed the output into an external amplifier board or a 3.5 mm headphone jack.
 
 ```
-ESP32 DevKit          I2S DAC
-─────────────         ───────
-GPIO 26  (BCLK) ───►  BCLK
-GPIO 25  (LRC)  ───►  LRC / WS
-GPIO 15  (DIN)  ───►  DIN
-3.3 V or 5 V    ───►  VIN       (check module datasheet)
+ESP32 DevKit          PCM5102A
+─────────────         ────────
+GPIO 26  (BCLK) ───►  BCK      (bit clock)
+GPIO 25  (LRC)  ───►  LRCK     (word-select / left-right clock)
+GPIO 15  (DIN)  ───►  DIN      (I2S data)
+3.3 V           ───►  VCC      ← 3.3 V ONLY — do NOT use 5 V
 GND             ───►  GND
-                      Speaker+  ───► Speaker (+)
-                      Speaker-  ───► Speaker (−)
+GND             ───►  SCK      ← tie LOW to enable internal PLL
+3.3 V           ───►  XSMT     ← tie HIGH to unmute (soft-mute control)
+GND             ───►  FMT      ← tie LOW for standard I2S format
+GND             ───►  FLT      ← tie LOW for normal-latency filter
+GND             ───►  DEMP     ← tie LOW to disable de-emphasis
+                      OUTL ───► Amp/Jack Left (+)
+                      OUTR ───► Amp/Jack Right (+)
+                      GND  ───► Amp/Jack Ground (−)
 ```
+
+> **Important — XSMT must be HIGH:** If this pin is left floating or tied low, the DAC output is muted and you will hear nothing. Pull it to 3.3 V (or wire it to a spare GPIO to control mute in software).
+
+> **Note on SCK:** The PCM5102A can generate its own master clock from BCK/LRCK when SCK is grounded (internal PLL mode). No additional clock output from the ESP32 is required.
 
 ---
 
@@ -404,7 +417,7 @@ Connect at **115200 baud** to observe the following structured log messages:
 | `[OK] Found 0 MP3 file(s)` | `/music` folder missing or files not `.mp3` | Create `/music` folder at SD root; rename files to `.mp3` |
 | `[WARN] OLED init failed` | Wrong I2C address or bad wiring | Try address `0x3D`; check SDA/SCL connections |
 | No audio output | I2S wiring error or wrong pins | Verify BCLK/LRC/DIN connections match `Pins` namespace |
-| Audio is clipping / distorted | Volume too high or speaker impedance mismatch | Lower volume; check speaker/DAC impedance rating |
+### OLED Display (128×32, I2C, SSD1306)
 | Buttons register multiple presses | Noisy button or debounce too short | Increase `PlayerConfig::DEBOUNCE_MS` (try 50–80) |
 | Player skips a track on next | `trackFinished` set during brief glitch | Check SD card health; try a higher quality card |
 | Tracks play in wrong order | Filenames not sorted as expected | Prefix filenames with zero-padded numbers (`001_`, `002_`) |

@@ -11,7 +11,7 @@
  * @section hardware Hardware
  *   - ESP32 DevKit (any variant)
  *   - MicroSD module (SPI, 3.3 V–safe)
- *   - I2S DAC module (e.g. MAX98357A)
+ *   - I2S DAC module (PCM5102A — 3.3 V, stereo line-level output)
  *   - 128×32 OLED display (I2C, SSD1306, address 0x3C)
  *   - 5× tactile push buttons (active-low via internal pull-ups)
  *
