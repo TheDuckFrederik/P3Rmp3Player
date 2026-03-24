@@ -1,6 +1,6 @@
 <div align="center">
 
-![P3R Music Player Banner](Banner.webp)
+![P3R Music Player Banner](IMG/Banner.webp)
 
 # P3R Music Player - Dark Hour Edition
 
@@ -60,7 +60,7 @@ The project is a love letter to the **Persona 3 Reload** OST and the aesthetic o
 
 ## System Architecture
 
-![System Architecture](Diagram.png)
+![System Architecture](IMG/Diagram.png)
 
 ---
 
