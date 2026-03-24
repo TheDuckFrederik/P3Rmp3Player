@@ -99,9 +99,8 @@ The project is a love letter to the **Persona 3 Reload** OST and the aesthetic o
 |---|---|---|
 | Microcontroller | ESP32 DevKit (any variant) | 38-pin or 30-pin boards both work |
 | MicroSD Module | SPI interface, FAT32 | Use a **3.3 V–safe** module; cheap 5 V modules may damage the ESP32 |
-| DAC Module | PCM5102A (I2S, 32-bit stereo) | Line-level output; requires an external amplifier or headphone jack board — **3.3 V only** |
-| Amplifier / Output | External audio amp or headphone jack breakout | e.g., PAM8403 for speakers; most PCM5102A breakout boards include a 3.5 mm jack |
-| Speaker | 4–8 Ω, ≥ 1 W (with external amp) | Not directly driven by the PCM5102A; wire through your amplifier board |
+| DAC Module | PCM5102A breakout board (I2S, 32-bit stereo) | Most breakout boards include a 3.5 mm headphone jack and pre-wired control pins — **3.3 V only** |
+| Headphones / Output | Wired headphones or 3.5 mm jack | Plug directly into the PCM5102A breakout board's onboard jack |
 | OLED Display | 128×32, I2C, SSD1306 controller | I2C address `0x3C` (most common) |
 | Push Buttons | Tactile momentary switches × 5 | Wired to GPIO and GND; uses internal pull-ups |
 | MicroSD Card | ≤ 32 GB, FAT32 formatted | SDHC cards up to 32 GB are the most reliable |
@@ -130,29 +129,70 @@ GND             ───►  GND
 
 ### I2S DAC — PCM5102A
 
-The PCM5102A is a high-quality 32-bit stereo I2S DAC. It outputs **line-level analog audio** on its OUTL/OUTR pins; it does **not** include a power amplifier. Feed the output into an external amplifier board or a 3.5 mm headphone jack.
+The PCM5102A is a high-quality 32-bit stereo I2S DAC with a line-level output. It does **not** include a power amplifier, but its output level is sufficient to drive **wired headphones directly** through a 3.5 mm jack.
+
+#### PCM5102A Pin Reference
+
+| Pin | Type | Description |
+|---|:---:|---|
+| `BCK` | IN | Audio bit-clock input |
+| `LRCK` | IN | Audio word-clock input (left/right select) |
+| `DIN` | IN | Audio serial data input |
+| `SCK` | IN | System clock input — tie `LOW` to enable internal PLL (no external clock needed) |
+| `XSMT` | IN | Soft-mute control — `LOW` = muted, `HIGH` = active |
+| `FMT` | IN | Audio format select — `LOW` = I2S, `HIGH` = left-justified |
+| `FLT` | IN | Filter select — `LOW` = normal latency, `HIGH` = low latency |
+| `DEMP` | IN | De-emphasis — `LOW` = off, `HIGH` = on (44.1 kHz only) |
+| `A3V3` | PWR | Analog 3.3 V supply |
+| `AGND` | PWR | Analog ground |
+| `LROUT` | OUT | Left channel analog output |
+| `ROUT` | OUT | Right channel analog output |
+
+---
+
+#### Using a PCM5102A breakout board (recommended)
+
+Standard PCM5102A breakout modules (common on Amazon / AliExpress) already have all control pins handled on-board and include a built-in 3.5 mm headphone jack. **If you are plugging headphones into the board's jack, you only need 5 wires from the ESP32:**
 
 ```
-ESP32 DevKit          PCM5102A
-─────────────         ────────
+ESP32 DevKit          PCM5102A Breakout
+─────────────         ─────────────────
 GPIO 26  (BCLK) ───►  BCK      (bit clock)
 GPIO 25  (LRC)  ───►  LRCK     (word-select / left-right clock)
 GPIO 15  (DIN)  ───►  DIN      (I2S data)
-3.3 V           ───►  VCC      ← 3.3 V ONLY — do NOT use 5 V
-GND             ───►  GND
-GND             ───►  SCK      ← tie LOW to enable internal PLL
-3.3 V           ───►  XSMT     ← tie HIGH to unmute (soft-mute control)
-GND             ───►  FMT      ← tie LOW for standard I2S format
-GND             ───►  FLT      ← tie LOW for normal-latency filter
-GND             ───►  DEMP     ← tie LOW to disable de-emphasis
-                      OUTL ───► Amp/Jack Left (+)
-                      OUTR ───► Amp/Jack Right (+)
-                      GND  ───► Amp/Jack Ground (−)
+3.3 V           ───►  A3V3     ← 3.3 V ONLY — do NOT use 5 V
+GND             ───►  AGND
 ```
 
-> **Important — XSMT must be HIGH:** If this pin is left floating or tied low, the DAC output is muted and you will hear nothing. Pull it to 3.3 V (or wire it to a spare GPIO to control mute in software).
+Then plug your headphones into the 3.5 mm jack on the breakout board. Done.
 
-> **Note on SCK:** The PCM5102A can generate its own master clock from BCK/LRCK when SCK is grounded (internal PLL mode). No additional clock output from the ESP32 is required.
+> **Note:** The breakout board's PCB already ties `SCK → AGND` (internal PLL), `XSMT → A3V3` (unmuted), and `FMT / FLT / DEMP → AGND` (standard I2S settings). No extra wiring is needed for those pins.
+
+---
+
+#### Using a bare PCM5102A chip (advanced)
+
+If you are working directly with the IC (no breakout board), all control pins must be wired manually:
+
+```
+ESP32 DevKit          PCM5102A (bare chip)
+─────────────         ────────────────────
+GPIO 26  (BCLK) ───►  BCK
+GPIO 25  (LRC)  ───►  LRCK
+GPIO 15  (DIN)  ───►  DIN
+3.3 V           ───►  A3V3     ← 3.3 V ONLY
+GND             ───►  AGND
+GND (AGND)      ───►  SCK      ← tie LOW → internal PLL mode
+3.3 V (A3V3)    ───►  XSMT     ← tie HIGH → unmuted
+GND (AGND)      ───►  FMT      ← tie LOW → I2S format
+GND (AGND)      ───►  FLT      ← tie LOW → normal-latency filter
+GND (AGND)      ───►  DEMP     ← tie LOW → de-emphasis off
+                      LROUT ───► 3.5 mm jack tip   (Left +)
+                      ROUT  ───► 3.5 mm jack ring  (Right +)
+                      AGND  ───► 3.5 mm jack sleeve (Ground)
+```
+
+> **Important — XSMT must be HIGH:** If left floating or tied low, the output is silenced. This is the most common wiring mistake with the bare chip.
 
 ---
 
@@ -416,8 +456,9 @@ Connect at **115200 baud** to observe the following structured log messages:
 | `[ERR] SD card init failed` | Bad wiring, wrong CS pin, or incompatible module | Double-check SPI pins; verify module is 3.3 V–safe |
 | `[OK] Found 0 MP3 file(s)` | `/music` folder missing or files not `.mp3` | Create `/music` folder at SD root; rename files to `.mp3` |
 | `[WARN] OLED init failed` | Wrong I2C address or bad wiring | Try address `0x3D`; check SDA/SCL connections |
-| No audio output | I2S wiring error or wrong pins | Verify BCLK/LRC/DIN connections match `Pins` namespace |
-### OLED Display (128×32, I2C, SSD1306)
+| No audio output | I2S wiring error or wrong pins | Verify BCK/LRCK/DIN connections match `Pins` namespace |
+| No audio from PCM5102A | `XSMT` unconnected or low | Tie `XSMT` to `A3V3` (3.3 V); confirm `SCK` is tied to `AGND` |
+| Audio is clipping / distorted | Volume too high or output level mismatch | Lower volume; the PCM5102A outputs ~2 Vrms line-level — ensure your headphones can handle it |
 | Buttons register multiple presses | Noisy button or debounce too short | Increase `PlayerConfig::DEBOUNCE_MS` (try 50–80) |
 | Player skips a track on next | `trackFinished` set during brief glitch | Check SD card health; try a higher quality card |
 | Tracks play in wrong order | Filenames not sorted as expected | Prefix filenames with zero-padded numbers (`001_`, `002_`) |
