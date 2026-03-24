@@ -1,14 +1,8 @@
 <div align="center">
 
-```
-██████╗ ██████╗ ██████╗     ███╗   ███╗██╗   ██╗███████╗██╗ ██████╗
-██╔══██╗╚════██╗██╔══██╗    ████╗ ████║██║   ██║██╔════╝██║██╔════╝
-██████╔╝ █████╔╝██████╔╝    ██╔████╔██║██║   ██║███████╗██║██║
-██╔═══╝  ╚═══██╗██╔══██╗    ██║╚██╔╝██║██║   ██║╚════██║██║██║
-██║     ██████╔╝██║  ██║    ██║ ╚═╝ ██║╚██████╔╝███████║██║╚██████╗
-╚═╝     ╚═════╝ ╚═╝  ╚═╝    ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝
-                    P L A Y E R   —   D A R K   H O U R   E D I T I O N
-```
+![P3R Music Player Banner](Banner.webp)
+
+# P3R Music Player - Dark Hour Edition
 
 **A Persona 3 Reload–inspired MP3 player built on ESP32 with I2S DAC, OLED display, and SD card playback.**
 
@@ -66,30 +60,7 @@ The project is a love letter to the **Persona 3 Reload** OST and the aesthetic o
 
 ## System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        ESP32 DevKit                         │
-│                                                             │
-│  ┌──────────┐   SPI    ┌──────────────┐                    │
-│  │ MicroSD  │◄────────►│  SD Library  │                    │
-│  │  Module  │  CS/SCK  │  (FAT32)     │                    │
-│  └──────────┘  MISO/   └──────┬───────┘                    │
-│                MOSI           │  MP3 file bytes             │
-│                               ▼                             │
-│                       ┌──────────────┐   I2S PCM   ┌─────┐ │
-│                       │ ESP32-audioI2S│────────────►│ DAC │ │
-│                       │  (MP3 decode) │ BCLK/LRC/   │     │ │
-│                       └──────────────┘ DIN(15)      └──┬──┘ │
-│                                                        │    │
-│  ┌──────────────┐  I2C  ┌───────────────┐          Speaker  │
-│  │  SSD1306     │◄─────►│ Display Logic │                   │
-│  │ 128×32 OLED  │  SDA/ └───────────────┘                   │
-│  └──────────────┘  SCL                                      │
-│                                                             │
-│  [BTN_PLAY] [BTN_NEXT] [BTN_PREV] [BTN_VOL+] [BTN_VOL-]   │
-│      GPIO32    GPIO33    GPIO27     GPIO14      GPIO13      │
-└─────────────────────────────────────────────────────────────┘
-```
+![System Architecture](Diagram.png)
 
 ---
 
